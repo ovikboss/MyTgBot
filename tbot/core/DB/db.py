@@ -125,7 +125,7 @@ class Database:
 
     def change_user_subscribe(self,user_id):
         user = self.session.query(User).filter(User.id == str(user_id)).first()
-        user.subscription = True
+        user.subscription += datetime.month()
         try:
             self.session.commit()
         except Exception as ex:

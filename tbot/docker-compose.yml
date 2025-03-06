@@ -1,0 +1,35 @@
+
+  services:
+    db:
+      image: postgres:latest
+      restart: always
+      environment:
+        POSTGRES_USER: "telegram_user"
+        POSTGRES_PASSWORD: "simonyan"
+        POSTGRES_DB: "telegram_db"
+      ports:
+        - "5432:5432" # Remove in production, expose only if needed for debugging
+      volumes:
+        - db_data:/var/lib/postgresql/data # Persist data
+
+    bot:
+      build: .  # Путь к Dockerfile вашего бота
+      restart: always
+      environment:
+        TZ: Europe/Moscow
+        BOT_TOKEN: your_telegram_bot_token
+        DATABASE_URL: postgresql://postgres:password@db:5432/telegram_db # Use service name as hostname
+      depends_on:
+        - db
+    web:
+      build: ../DjangoAdmin/myproject # Относительный путь к Dockerfile Django-проекта
+      command: gunicorn --bind 0.0.0.0:8000 myproject.wsgi
+      ports:
+        - "8000:8000"
+      environment:
+        DJANGO_SETTINGS_MODULE: myproject.settings
+      depends_on:
+        - db
+
+  volumes:
+    db_data:
